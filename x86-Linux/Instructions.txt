@@ -1,0 +1,8 @@
+Instructions Example:
+
+    mov rbx, 123       ; rbx = 123
+    mov rax, rbx      ; rax = rbx
+    add rbx, rcx      ; rbx += rcx
+    sub rbx, rdx      ; rbx -= rdx
+    mul rbx           ; rax *= rbx (implicitly using rax)
+    div rdx           ; rax /= rdx (implicitly using rax)

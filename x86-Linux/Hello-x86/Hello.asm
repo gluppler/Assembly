@@ -1,17 +1,18 @@
-global _start
-
 section .data
-	msg db "Hello, world!", 0x0a
-	len equ $ - msg
+    msg db "Hello, world!", 0x0a  ; Message to print
+    len equ $ - msg                ; Length of the message
 
 section .text
-_start:
-	mov eax, 4	; sys_write system call
-	mov ebx, 1	; stdout file descriptor
-	mov ecx, msg	; bytes to write
-	mov edx, len 	; number of bytes to write
-	int 0x80	; perform system call
+    global _start
 
-	mov eax, 1	; sys_exit system call
-	mov ebx, 0	; exit status is 0
-	int 0x80	; perform system call
+_start:
+    mov rax, 1                     ; syscall number for sys_write
+    mov rdi, 1                     ; stdout file descriptor
+    mov rsi, msg                   ; pointer to the message
+    mov rdx, len                   ; number of bytes to write
+    syscall                        ; invoke the syscall
+
+    mov rax, 60                    ; syscall number for sys_exit
+    xor rdi, rdi                   ; exit status 0
+    syscall                        ; invoke the syscall
+
