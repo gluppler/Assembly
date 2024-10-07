@@ -1,19 +1,17 @@
+global _start
+
 section .data
-    hello db 'Hello, World!', 0xA  ; The string and newline (0xA is the newline character)
+	msg db "Hello, world!", 0x0a
+	len equ $ - msg
 
 section .text
-    global _start                 ; Entry point for the linker
-
 _start:
-    ; Write the string to stdout (file descriptor 1)
-    mov rax, 1                    ; sys_write system call number
-    mov rdi, 1                    ; File descriptor (1 = stdout)
-    mov rsi, hello                ; Address of the string to output
-    mov rdx, 14                   ; Length of the string
-    syscall                       ; Invoke the system call
+	mov eax, 4	; sys_write system call
+	mov ebx, 1	; stdout file descriptor
+	mov ecx, msg	; bytes to write
+	mov edx, len 	; number of bytes to write
+	int 0x80	; perform system call
 
-    ; Exit the program
-    mov rax, 60                   ; sys_exit system call number
-    xor rdi, rdi                  ; Exit code (0)
-    syscall                       ; Invoke the system call
-
+	mov eax, 1	; sys_exit system call
+	mov ebx, 0	; exit status is 0
+	int 0x80	; perform system call
