@@ -1,67 +1,59 @@
+section .data
+    prompt db "Counting from 1 to 10:", 10, 0   ; Prompt message
+    newline db 10, 0                            ; Newline character
+
 section .bss
-    count resq 1                ; Reserve space for a 64-bit integer (count)
+    num resq 1                                  ; Reserve space for current number (64-bit)
+    buffer resb 4                               ; Reserve space for output buffer (ASCII)
 
 section .text
-    global _start               ; Entry point
+    global _start                                ; Entry point for the program
 
 _start:
-    ; Initialize count to 1
-    mov qword [count], 1        ; Store the value 1 in the count variable
+    ; Print the prompt message to stdout
+    mov rax, 1                                  ; Syscall number for write
+    mov rdi, 1                                  ; File descriptor (stdout)
+    mov rsi, prompt                             ; Pointer to the prompt message
+    mov rdx, 21                                 ; Length of the prompt message
+    syscall                                     ; Invoke the syscall
 
-.loop:
-    ; Load count into rax
-    mov rax, [count]            ; Move the value of count into rax (64-bit)
+    ; Initialize num to 1
+    mov qword [num], 1                          ; Store the value 1 in num
 
-    ; Compare count with 5
-    cmp rax, 5                  ; Compare rax with 5
-    jg .end_loop                ; If count > 5, jump to end_loop
+while_loop:
+    ; Load current number into rax for comparison
+    mov rax, [num]                              ; Load num into rax
+    cmp rax, 10                                 ; Compare num with 10
+    jg end_while                                ; Jump to end_while if num > 10
 
-    ; Print the current count
-    mov rdi, rax                ; Move the value of count to rdi (for syscall argument)
-    call print_number           ; Call the print_number function to print it
+    ; Convert the number to ASCII
+    mov rbx, [num]                              ; Load num into rbx
+    add rbx, '0'                                ; Convert the number to its ASCII equivalent
 
-    ; Print a newline character
-    call print_newline           ; Call function to print newline
+    ; Store the ASCII character in buffer
+    mov [buffer], rbx                           ; Store ASCII character in buffer
 
-    ; Increment count
-    inc qword [count]           ; Increment the count variable
-    
-    ; Jump back to the start of the loop
-    jmp .loop                   ; Repeat the loop
+    ; Print the current number (ASCII character)
+    mov rax, 1                                  ; Syscall number for write
+    mov rdi, 1                                  ; File descriptor (stdout)
+    mov rsi, buffer                             ; Pointer to buffer (containing ASCII character)
+    mov rdx, 1                                  ; Length of the output (1 byte)
+    syscall                                     ; Invoke the syscall
 
-.end_loop:
+    ; Print a newline after each number
+    mov rax, 1                                  ; Syscall number for write
+    mov rdi, 1                                  ; File descriptor (stdout)
+    mov rsi, newline                            ; Pointer to newline character
+    mov rdx, 1                                  ; Length of the newline
+    syscall                                     ; Invoke the syscall
+
+    ; Increment the number
+    inc qword [num]                             ; Increment the value stored in num
+    jmp while_loop                              ; Repeat the loop
+
+end_while:
     ; Exit the program
-    mov rax, 60                 ; Syscall number for exit (sys_exit)
-    xor rdi, rdi                ; Exit code 0
-    syscall                     ; Make the syscall to exit
+    mov rax, 60                                 ; Syscall number for exit
+    xor rdi, rdi                                ; Return code 0
+    syscall                                     ; Invoke the syscall
 
-; -------------------------------------------------------
-; print_number: Prints the number in rdi
-; -------------------------------------------------------
-print_number:
-    ; Convert the number in rdi to its ASCII value using the digit_table
-    mov rax, digit_table        ; Load the base address of the digit_table into rax
-    add rax, rdi                ; Add the value in rdi to get the right digit
-    
-    ; Syscall to write the number to stdout
-    mov rdi, 1                  ; File descriptor 1 (stdout)
-    mov rsi, rax                ; Move the address of the digit into rsi
-    mov rdx, 1                  ; Print 1 character (just the number)
-    mov rax, 1                  ; Syscall number for write (sys_write)
-    syscall                     ; Make the syscall
-    ret                         ; Return to the caller
-
-; -------------------------------------------------------
-; print_newline: Prints a newline character
-; -------------------------------------------------------
-print_newline:
-    mov rax, 1                  ; Syscall number for write (sys_write)
-    mov rdi, 1                  ; File descriptor 1 (stdout)
-    lea rsi, [newline]          ; Load the address of newline into rsi
-    mov rdx, 1                  ; Print 1 character (newline)
-    syscall                     ; Make the syscall
-    ret                         ; Return to the caller
-
-section .data
-    digit_table db '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    newline db 10               ; Newline character
