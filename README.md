@@ -9,3 +9,6 @@ ld -o example example.o
 
 ### With C Libraries/Functions
 gcc -o program program.o -no-pie -lc
+
+### Run
+./example
